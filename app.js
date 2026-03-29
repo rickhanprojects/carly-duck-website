@@ -52,6 +52,79 @@ const gallery = document.getElementById("gallery");
 const whiteboard = document.getElementById("whiteboard");
 const clearBtn = document.getElementById("clearBtn");
 
+// ---- Auto-crop: trim transparent pixels from a PNG ----
+// Returns a new image URL (data URL) with transparent padding removed.
+function autoCrop(img) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const { data, width, height } = imageData;
+
+    let top = height, left = width, bottom = 0, right = 0;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const alpha = data[(y * width + x) * 4 + 3];
+        if (alpha > 10) { // non-transparent pixel
+          if (y < top) top = y;
+          if (y > bottom) bottom = y;
+          if (x < left) left = x;
+          if (x > right) right = x;
+        }
+      }
+    }
+
+    // Add a small padding (2% of dimensions)
+    const padX = Math.round((right - left) * 0.02);
+    const padY = Math.round((bottom - top) * 0.02);
+    top = Math.max(0, top - padY);
+    left = Math.max(0, left - padX);
+    bottom = Math.min(height - 1, bottom + padY);
+    right = Math.min(width - 1, right + padX);
+
+    const cropW = right - left + 1;
+    const cropH = bottom - top + 1;
+
+    if (cropW <= 0 || cropH <= 0) {
+      resolve(img.src);
+      return;
+    }
+
+    const cropped = document.createElement("canvas");
+    cropped.width = cropW;
+    cropped.height = cropH;
+    const cCtx = cropped.getContext("2d");
+    cCtx.drawImage(canvas, left, top, cropW, cropH, 0, 0, cropW, cropH);
+
+    resolve(cropped.toDataURL("image/png"));
+  });
+}
+
+// Cache for cropped image URLs
+const croppedCache = {};
+
+// Load and auto-crop an image, returns a promise with the cropped data URL
+function getCroppedSrc(src) {
+  if (croppedCache[src]) return Promise.resolve(croppedCache[src]);
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      autoCrop(img).then((croppedUrl) => {
+        croppedCache[src] = croppedUrl;
+        resolve(croppedUrl);
+      });
+    };
+    img.onerror = () => resolve(src); // fallback to original
+    img.src = src;
+  });
+}
+
 // ---- Build gallery ----
 GALLERY_ITEMS.forEach((item, idx) => {
   const el = document.createElement("div");
@@ -61,9 +134,12 @@ GALLERY_ITEMS.forEach((item, idx) => {
 
   if (item.src) {
     const img = document.createElement("img");
-    img.src = item.src;
     img.alt = item.label;
     el.appendChild(img);
+    // Auto-crop and display
+    getCroppedSrc(item.src).then((croppedUrl) => {
+      img.src = croppedUrl;
+    });
   } else {
     el.textContent = item.emoji;
   }
@@ -119,10 +195,13 @@ function placeItem(item, x, y, size = 80) {
 
   if (item.src) {
     const img = document.createElement("img");
-    img.src = item.src;
     img.alt = item.label;
     img.style.width = size + "px";
     el.appendChild(img);
+    // Use cropped version
+    getCroppedSrc(item.src).then((croppedUrl) => {
+      img.src = croppedUrl;
+    });
   } else {
     el.style.fontSize = size + "px";
     el.textContent = item.emoji;
