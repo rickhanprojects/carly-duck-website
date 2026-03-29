@@ -3,26 +3,45 @@
 // To use a real image: { src: "images/tree.png", label: "Tree" }
 // ============================================================
 const GALLERY_ITEMS = [
-  { emoji: "🌳", label: "Tree" },
-  { emoji: "🏠", label: "House" },
-  { emoji: "🧍", label: "Person" },
-  { emoji: "🐕", label: "Dog" },
-  { emoji: "🐈", label: "Cat" },
-  { emoji: "🚗", label: "Car" },
-  { emoji: "⭐", label: "Star" },
-  { emoji: "❤️", label: "Heart" },
-  { emoji: "🌸", label: "Flower" },
-  { emoji: "🦋", label: "Butterfly" },
-  { emoji: "☀️", label: "Sun" },
-  { emoji: "🌙", label: "Moon" },
-  { emoji: "🐟", label: "Fish" },
-  { emoji: "🐦", label: "Bird" },
-  { emoji: "🏔️", label: "Mountain" },
-  { emoji: "🌊", label: "Wave" },
-  { emoji: "🔥", label: "Fire" },
-  { emoji: "🪨", label: "Rock" },
-  { emoji: "🌈", label: "Rainbow" },
-  { emoji: "👑", label: "Crown" },
+  { src: "duck_pictures/Angry Duck Front.png", label: "Angry Duck" },
+  { src: "duck_pictures/Baseball Duck Front.png", label: "Baseball Duck" },
+  { src: "duck_pictures/Black Mask Duck Front.png", label: "Black Mask" },
+  { src: "duck_pictures/Block  Duck Front.png", label: "Block Duck" },
+  { src: "duck_pictures/blue masked Duck front.png", label: "Blue Mask" },
+  { src: "duck_pictures/Brown Stripe Front.png", label: "Brown Stripe" },
+  { src: "duck_pictures/Bumble Bee Front.png", label: "Bumble Bee" },
+  { src: "duck_pictures/Cool Guy Front.png", label: "Cool Guy" },
+  { src: "duck_pictures/Cute Duck Front.png", label: "Cute Duck" },
+  { src: "duck_pictures/Easter Egg Duck Front.png", label: "Easter Egg" },
+  { src: "duck_pictures/Elephant Duck Front For real.png", label: "Elephant" },
+  { src: "duck_pictures/Farmer Duck Front.png", label: "Farmer" },
+  { src: "duck_pictures/Giraffe Duck Front.png", label: "Giraffe" },
+  { src: "duck_pictures/Green Bird Front.png", label: "Green Bird" },
+  { src: "duck_pictures/Green Dragon Front.png", label: "Green Dragon" },
+  { src: "duck_pictures/Green Mohawk Duck Front.png", label: "Mohawk Green" },
+  { src: "duck_pictures/Lil Black Front.png", label: "Lil Black" },
+  { src: "duck_pictures/Lil Red Front.png", label: "Lil Red" },
+  { src: "duck_pictures/Lil Yellow Front.png", label: "Lil Yellow" },
+  { src: "duck_pictures/Lion Duck front.png", label: "Lion Duck" },
+  { src: "duck_pictures/Luau Front.png", label: "Luau" },
+  { src: "duck_pictures/Mohawk Duck Front.png", label: "Mohawk" },
+  { src: "duck_pictures/Monkey Duck Front.png", label: "Monkey" },
+  { src: "duck_pictures/Mouse Elephant Front.png", label: "Mouse" },
+  { src: "duck_pictures/Orange Barbed Wire Duck Front.png", label: "Barbed Wire" },
+  { src: "duck_pictures/Orange Duck front.png", label: "Orange Duck" },
+  { src: "duck_pictures/Pig Duck front.png", label: "Pig Duck" },
+  { src: "duck_pictures/Pink Bird Front.png", label: "Pink Bird" },
+  { src: "duck_pictures/Pink duck mask front.png", label: "Pink Mask" },
+  { src: "duck_pictures/Polka Dot Front.png", label: "Polka Dot" },
+  { src: "duck_pictures/Princess Front.png", label: "Princess" },
+  { src: "duck_pictures/Shark Front.png", label: "Shark" },
+  { src: "duck_pictures/Snowman Duck front.png", label: "Snowman" },
+  { src: "duck_pictures/Soccer Front.png", label: "Soccer" },
+  { src: "duck_pictures/Swimming Duck Front.png", label: "Swimming" },
+  { src: "duck_pictures/Tiger Duck Front.png", label: "Tiger Duck" },
+  { src: "duck_pictures/Uncle Sam Duck front.png", label: "Uncle Sam" },
+  { src: "duck_pictures/Unicorn Duck front.png", label: "Unicorn" },
+  { src: "duck_pictures/White Barbed wire Front.png", label: "White Barbed" },
 ];
 
 // ---- State ----
@@ -91,12 +110,12 @@ whiteboard.addEventListener("drop", (e) => {
 });
 
 // ---- Place an item on the whiteboard ----
-function placeItem(item, x, y, size = 48) {
+function placeItem(item, x, y, size = 80) {
   const el = document.createElement("div");
   el.className = "placed-item";
   el.style.left = x + "px";
   el.style.top = y + "px";
-  el.style.fontSize = size + "px";
+  el.style.width = size + "px";
 
   if (item.src) {
     const img = document.createElement("img");
@@ -105,6 +124,7 @@ function placeItem(item, x, y, size = 48) {
     img.style.width = size + "px";
     el.appendChild(img);
   } else {
+    el.style.fontSize = size + "px";
     el.textContent = item.emoji;
   }
 
@@ -155,7 +175,7 @@ function placeItem(item, x, y, size = 48) {
 
   resize.addEventListener("mousedown", (e) => {
     isResizing = true;
-    startSize = parseFloat(el.style.fontSize);
+    startSize = parseFloat(el.style.width || el.style.fontSize);
     startX = e.clientX;
     e.stopPropagation();
     e.preventDefault();
@@ -165,9 +185,13 @@ function placeItem(item, x, y, size = 48) {
     if (!isResizing) return;
     const delta = e.clientX - startX;
     const newSize = Math.max(20, startSize + delta * 0.5);
-    el.style.fontSize = newSize + "px";
     const img = el.querySelector("img");
-    if (img) img.style.width = newSize + "px";
+    if (img) {
+      el.style.width = newSize + "px";
+      img.style.width = newSize + "px";
+    } else {
+      el.style.fontSize = newSize + "px";
+    }
   });
 
   document.addEventListener("mouseup", () => {

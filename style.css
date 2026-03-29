@@ -18,8 +18,8 @@ body {
 
 /* ---- Sidebar ---- */
 .sidebar {
-  width: 200px;
-  min-width: 200px;
+  width: 240px;
+  min-width: 240px;
   background: #fff;
   border-right: 2px solid #ddd;
   display: flex;
