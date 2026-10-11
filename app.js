@@ -4,7 +4,7 @@
 // ============================================================
 const GALLERY_ITEMS = [
   { src: "duck_pictures/Angry Duck Front.png", label: "Angry Duck" },
-  { src: "duck_pictures/Baseball Duck Front.png", label: "Baseball Duck" },
+  { src: "duck_pictures/Baseball Front.png", label: "Baseball Duck" },
   { src: "duck_pictures/Black Mask Duck Front.png", label: "Black Mask" },
   { src: "duck_pictures/Block  Duck Front.png", label: "Block Duck" },
   { src: "duck_pictures/blue masked Duck front.png", label: "Blue Mask" },
