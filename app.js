@@ -155,6 +155,7 @@ GALLERY_ITEMS.forEach((item, idx) => {
   el.className = "gallery-item";
   el.dataset.index = idx;
   el.draggable = true;
+  el.title = item.label;
 
   if (item.src) {
     const img = document.createElement("img");
@@ -188,6 +189,22 @@ GALLERY_ITEMS.forEach((item, idx) => {
 
   gallery.appendChild(el);
 });
+
+// ---- Size gallery so all items fit in 3 columns without scrolling ----
+function fitGallery() {
+  const COLS = 3, GAP = 4, PAD = 6, MIN_CELL = 48;
+  const rows = Math.ceil(GALLERY_ITEMS.length / COLS);
+  const availH = gallery.clientHeight - PAD * 2 - GAP * (rows - 1);
+  const maxW = Math.min(window.innerWidth * 0.45, 600);
+  const maxCellW = (maxW - PAD * 2 - GAP * (COLS - 1) - 4) / COLS;
+  const cell = Math.floor(Math.max(MIN_CELL, Math.min(availH / rows, maxCellW)));
+  gallery.style.setProperty("--cell", cell + "px");
+  document.documentElement.style.setProperty(
+    "--sidebar-w", cell * COLS + GAP * (COLS - 1) + PAD * 2 + 16 + "px");
+  gallery.classList.toggle("no-labels", cell < 70);
+}
+fitGallery();
+window.addEventListener("resize", fitGallery);
 
 // ---- Whiteboard: click to place ----
 whiteboard.addEventListener("click", (e) => {
