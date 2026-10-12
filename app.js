@@ -190,21 +190,55 @@ GALLERY_ITEMS.forEach((item, idx) => {
   gallery.appendChild(el);
 });
 
-// ---- Size gallery so all items fit in 3 columns without scrolling ----
+// ---- Size gallery: auto-fit 3 columns, or follow the dragged sidebar width ----
+const sidebar = document.querySelector(".sidebar");
+const resizer = document.getElementById("resizer");
+const COLS = 3, GAP = 4, PAD = 6, MIN_CELL = 48, CHROME = 16;
+let manualWidth = null; // set once the user drags the boundary
+
+function applySidebarWidth(width) {
+  const cell = Math.floor((width - PAD * 2 - GAP * (COLS - 1) - CHROME) / COLS);
+  gallery.style.setProperty("--cell", cell + "px");
+  document.documentElement.style.setProperty("--sidebar-w", width + "px");
+  gallery.classList.toggle("no-labels", cell < 70);
+}
+
 function fitGallery() {
-  const COLS = 3, GAP = 4, PAD = 6, MIN_CELL = 48;
+  if (manualWidth !== null) {
+    const maxW = Math.floor(window.innerWidth * 0.8);
+    applySidebarWidth(Math.min(manualWidth, maxW));
+    return;
+  }
   const rows = Math.ceil(GALLERY_ITEMS.length / COLS);
   const availH = gallery.clientHeight - PAD * 2 - GAP * (rows - 1);
   const maxW = Math.min(window.innerWidth * 0.45, 600);
   const maxCellW = (maxW - PAD * 2 - GAP * (COLS - 1) - 4) / COLS;
   const cell = Math.floor(Math.max(MIN_CELL, Math.min(availH / rows, maxCellW)));
-  gallery.style.setProperty("--cell", cell + "px");
-  document.documentElement.style.setProperty(
-    "--sidebar-w", cell * COLS + GAP * (COLS - 1) + PAD * 2 + 16 + "px");
-  gallery.classList.toggle("no-labels", cell < 70);
+  applySidebarWidth(cell * COLS + GAP * (COLS - 1) + PAD * 2 + CHROME);
 }
 fitGallery();
 window.addEventListener("resize", fitGallery);
+
+// Drag the sidebar boundary to magnify / shrink the gallery pictures
+resizer.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  resizer.setPointerCapture(e.pointerId);
+  document.body.classList.add("resizing");
+  const move = (ev) => {
+    const minW = MIN_CELL * COLS + GAP * (COLS - 1) + PAD * 2 + CHROME;
+    manualWidth = Math.max(minW, Math.min(ev.clientX, window.innerWidth * 0.8));
+    fitGallery();
+  };
+  const up = () => {
+    document.body.classList.remove("resizing");
+    resizer.removeEventListener("pointermove", move);
+    resizer.removeEventListener("pointerup", up);
+    resizer.removeEventListener("pointercancel", up);
+  };
+  resizer.addEventListener("pointermove", move);
+  resizer.addEventListener("pointerup", up);
+  resizer.addEventListener("pointercancel", up);
+});
 
 // ---- Whiteboard: click to place ----
 whiteboard.addEventListener("click", (e) => {

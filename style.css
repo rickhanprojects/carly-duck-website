@@ -48,8 +48,8 @@ body {
 
 .gallery-item {
   aspect-ratio: 1;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -75,8 +75,8 @@ body {
 }
 
 .gallery-item img {
-  max-width: 80%;
-  max-height: 80%;
+  max-width: 96%;
+  max-height: 96%;
   object-fit: contain;
   pointer-events: none;
 }
@@ -89,6 +89,28 @@ body {
   white-space: nowrap;
   overflow: hidden;
   max-width: 100%;
+}
+
+/* ---- Draggable sidebar boundary ---- */
+.resizer {
+  width: 8px;
+  margin-left: -4px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.resizer:hover,
+body.resizing .resizer {
+  background: rgba(124, 77, 255, 0.35);
+}
+
+body.resizing {
+  cursor: col-resize;
+  user-select: none;
 }
 
 /* ---- Whiteboard ---- */
